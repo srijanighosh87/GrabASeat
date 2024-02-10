@@ -1,0 +1,6 @@
+@Grab.A.Seat.Services.BookingService_HostAddress = http://localhost:5255
+
+GET {{Grab.A.Seat.Services.BookingService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

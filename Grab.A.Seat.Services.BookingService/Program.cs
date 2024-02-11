@@ -39,6 +39,18 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+
+//CORS Settings
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin", builder =>
+    {
+        builder.WithOrigins("http://localhost:8080") // access allowed only from Gateway
+               .AllowAnyHeader()
+               .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 //using var scope = app.Services.CreateScope();
@@ -62,6 +74,7 @@ else
 }
 
 
+app.UseCors("AllowSpecificOrigin");
 
 app.UseHttpsRedirection();
 

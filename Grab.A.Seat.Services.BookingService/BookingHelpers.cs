@@ -41,7 +41,7 @@ namespace Grab.A.seat.BookingService
         {
             return new BookingDto
             {
-                BookingRefence = booking.BookingReference,
+                bookingReference = booking.BookingReference,
                 BookingStartDateTime = booking.BookingStartDateTime,
                 Comments = booking.Comments,
                 CustomerName = booking.Customer.Name,

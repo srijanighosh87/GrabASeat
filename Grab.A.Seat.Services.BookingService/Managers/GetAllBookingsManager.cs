@@ -38,15 +38,15 @@ namespace Grab.A.Seat.BookingAPI.Bookings.Managers
                 else
                     allBookings = _dbContext.Bookings.Include(c => c.Customer).Include(t => t.Table).OrderByDescending(a => a.BookingStartDateTime).AsNoTracking();
 
-                var x = allBookings.OfType<Booking>();
+                var allBookingsAsOBjects = allBookings.OfType<Booking>();
                 var allDtos = new List<BookingDto>();
 
-                foreach (var bookingObj in x)
+                foreach (var bookingObj in allBookingsAsOBjects)
                 {
                     allDtos.Add(BookingHelpers.ConvertBookingToDto(bookingObj));
                 }
 
-                return WrapResponse.WrapOk(_responseDto, "Returning All Bookings", x);
+                return WrapResponse.WrapOk(_responseDto, "Returning All Bookings", allDtos);
             }
             catch (Exception e)
             {

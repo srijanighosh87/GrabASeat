@@ -5,6 +5,7 @@ using Grab.A.Seat.Shared.Manager;
 using Grab.A.Seat.Shared.ManagerConfig;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace Grab.A.Seat.BookingAPI.Bookings
 {
@@ -52,13 +53,27 @@ namespace Grab.A.Seat.BookingAPI.Bookings
         /// Get All Bookings
         /// </summary>
         /// <returns>ResponseDto</returns>
+        [SwaggerResponse(StatusCodes.Status200OK, "Successful", typeof(ResponseDto))]
+        [SwaggerResponse(StatusCodes.Status409Conflict, "Conflict", typeof(ResponseDto))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found", typeof(ResponseDto))]
         [HttpGet("GetAllBookings")]
-        public async Task<ResponseDto> GetAllBookings(bool isTrackingEnabled)
+        public async Task<IActionResult> GetAllBookings()
         {
-            return await _getAllBookingsManager.ProcessAsync(new GetAllBookingCommand
+            var response = await _getAllBookingsManager.ProcessAsync(new GetAllBookingCommand
             {
-                isTrackingEnabled = isTrackingEnabled
+                isTrackingEnabled = true
             });
+            if (response.IsSuccess)
+                return Ok(response);
+            else
+            {
+                return Conflict(new ResponseDto
+                {
+                    IsSuccess = false,
+                    Message = response.Message,
+                    Result = response.Result
+                });
+            }
         }
 
         /// <summary>
@@ -88,11 +103,24 @@ namespace Grab.A.Seat.BookingAPI.Bookings
         /// Delete a  booking
         /// </summary>
         /// <param name="id"></param>
-        /// <returns></returns>
+        [SwaggerResponse(StatusCodes.Status200OK, "Successful", typeof(ResponseDto))]
+        [SwaggerResponse(StatusCodes.Status409Conflict, "Conflict", typeof(ResponseDto))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Not Found", typeof(ResponseDto))]
         [HttpDelete("{id}")]
-        public async Task<ResponseDto> DeleteBooking(Guid id)
+        public async Task<IActionResult> DeleteBooking(Guid id)
         {
-            return await _deleteBookingManager.ProcessAsync(new DeleteBookingCommand { Id = id });
+            var response = await _deleteBookingManager.ProcessAsync(new DeleteBookingCommand { Id = id });
+            if (response.IsSuccess)
+                return Ok(response);
+            else
+            {
+                return Conflict(new ResponseDto
+                {
+                    IsSuccess = false,
+                    Message = response.Message,
+                    Result = response.Result
+                });
+            }
         }
     }
 }

@@ -47,7 +47,8 @@ namespace Grab.A.seat.BookingService
                 CustomerName = booking.Customer.Name,
                 Id = booking.Id,
                 PartySize = booking.PartySize,
-                TableNumber = booking.Table.TableNumber
+                TableNumber = booking.Table.TableNumber,
+                CustomerContact = booking.Customer.ContactNumber
             };
         }
     }

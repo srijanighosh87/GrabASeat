@@ -104,10 +104,20 @@ namespace Grab.A.Seat.BookingAPI.Bookings
         /// <param name="updateCustomer"></param>
         /// <returns>ResponseDto</returns>
         [HttpPut]
-        public async Task<ResponseDto> UpdateBooking([FromBody] UpdateBookingCommand updateCustomer)
+        public async Task<IActionResult> UpdateBooking([FromBody] UpdateBookingCommand updateCustomer)
         {
-            var x = await _updateBookingManager.ProcessAsync(updateCustomer);
-            return x;
+            var response = await _updateBookingManager.ProcessAsync(updateCustomer);
+            if (response.IsSuccess)
+                return Ok(response);
+            else
+            {
+                return Conflict(new ResponseDto
+                {
+                    IsSuccess = false,
+                    Message = response.Message,
+                    Result = response.Result
+                });
+            }
         }
 
         /// <summary>

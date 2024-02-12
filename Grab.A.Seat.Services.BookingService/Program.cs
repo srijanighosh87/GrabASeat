@@ -45,9 +45,15 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowSpecificOrigin", builder =>
     {
-        builder.WithOrigins("http://localhost:8080") // access allowed only from Gateway
+        builder
+        //.WithOrigins("http://localhost:8080") // access allowed only from Gateway
                .AllowAnyHeader()
-               .AllowAnyMethod();
+               .AllowAnyMethod()
+               .AllowAnyOrigin();
+
+        //builder.WithOrigins("https://grabaseatbookingservice.azurewebsites.net/") // access allowed only from Gateway
+        //    .AllowAnyHeader()
+        //    .AllowAnyMethod();
     });
 });
 

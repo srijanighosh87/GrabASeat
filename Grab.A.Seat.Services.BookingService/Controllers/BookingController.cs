@@ -82,9 +82,20 @@ namespace Grab.A.Seat.BookingAPI.Bookings
         /// <param name="addCustomer"></param>
         /// <returns>ResponseDto</returns>
         [HttpPost]
-        public async Task<ResponseDto> CreateBooking([FromBody] AddBookingCommand addCustomer)
+        public async Task<IActionResult> CreateBooking([FromBody] AddBookingCommand addCustomer)
         {
-            return await _addManager.ProcessAsync(addCustomer);
+            var response = await _addManager.ProcessAsync(addCustomer);
+            if (response.IsSuccess)
+                return Ok(response);
+            else
+            {
+                return Conflict(new ResponseDto
+                {
+                    IsSuccess = false,
+                    Message = response.Message,
+                    Result = response.Result
+                });
+            }
         }
 
         /// <summary>

@@ -12,38 +12,49 @@ using System.Linq;
 
 namespace Grab.A.Seat.BookingAPI.Bookings.Managers
 {
-    public class GetAllBookingsManager : BaseGetAllManager<GetAllBookingCommand>
+    public class GetPaginatedBookingsManager : BaseGetAllManager<GetPaginatedBookingCommand>
     {
-        private readonly ILogger<GetAllBookingsManager> _logger;
+        private readonly ILogger<GetPaginatedBookingsManager> _logger;
         ResponseDto _responseDto;
         private readonly ApplicationDbContext _dbContext;
 
 
-        public GetAllBookingsManager(
-            ILogger<GetAllBookingsManager> logger,
+        public GetPaginatedBookingsManager(
+            ILogger<GetPaginatedBookingsManager> logger,
             ApplicationDbContext dbContext)
         {
             _logger = logger;
             _responseDto = new ResponseDto();
             this._dbContext = dbContext;
         }
-        public async Task<ResponseDto> ProcessAsync(GetAllBookingCommand command)
+        public async Task<ResponseDto> ProcessAsync(GetPaginatedBookingCommand command)
         {
             try
             {
                 IQueryable allBookings;
-                if(command.fetchPastBookings)
+                int count = 0;
+                if (command.fetchPastBookings)
+                {
                     allBookings = _dbContext.Bookings
                         .Include(c => c.Customer)
                         .Include(t => t.Table)
-                        .OrderByDescending(a => a.BookingStartDateTime).AsNoTracking();
+                        .OrderByDescending(a => a.BookingStartDateTime)
+                        .Skip((command.pageNumber - 1) * command.numberOfItemsPerPage)
+                        .Take(command.numberOfItemsPerPage);
+                    count = _dbContext.Bookings.Count();
+                }
                 else
+                {
                     allBookings = _dbContext.Bookings
                         .Include(c => c.Customer)
                         .Include(t => t.Table)
                         .Where(d => d.BookingStartDateTime >= DateTime.UtcNow)
-                        .OrderByDescending(a => a.BookingStartDateTime).AsNoTracking();
-
+                        .OrderByDescending(a => a.BookingStartDateTime)
+                        .Skip((command.pageNumber - 1) * command.numberOfItemsPerPage)
+                        .Take(command.numberOfItemsPerPage);
+                    count = _dbContext.Bookings.Where(d => d.BookingStartDateTime >= DateTime.UtcNow).Count();
+                }
+                
                 var allBookingsAsOBjects = allBookings.OfType<Booking>();
                 var allDtos = new List<BookingDto>();
 
@@ -52,7 +63,11 @@ namespace Grab.A.Seat.BookingAPI.Bookings.Managers
                     allDtos.Add(BookingHelpers.ConvertBookingToDto(bookingObj));
                 }
 
-                return WrapResponse.WrapOk(_responseDto, "Returning All Bookings", allDtos);
+                return WrapResponse.WrapOk(_responseDto, "Returning All Bookings", new
+                {
+                    allDtos = allDtos,
+                    count = count
+                });
             }
             catch (Exception e)
             {

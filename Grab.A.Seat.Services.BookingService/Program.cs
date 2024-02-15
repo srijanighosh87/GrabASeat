@@ -28,9 +28,12 @@ var serviceProvider = builder.Services.AddDbContext<ApplicationDbContext>(option
 #region Booking
 builder.Services.AddScoped<BaseManager<AddBookingCommand>, AddBookingManager>();
 builder.Services.AddScoped<BaseGetAllManager<GetAllBookingCommand>, GetAllBookingsManager>();
+builder.Services.AddScoped<BaseGetAllManager<GetPaginatedBookingCommand>, GetPaginatedBookingsManager>();
 builder.Services.AddScoped<BaseManager<GetBookingByIdCommand>, GetBookingByIdManager>();
 builder.Services.AddScoped<BaseManager<UpdateBookingCommand>, UpdateBookingManager>();
 builder.Services.AddScoped<BaseManager<DeleteBookingCommand>, DeleteBookingManager>();
+builder.Services.AddScoped<BaseGetAllManager<SearchBookingCommand>, SearchBookingsManager>();
+
 
 #endregion
 

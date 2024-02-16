@@ -361,3 +361,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/Grab.A.Seat.Services.BookingService/appsettings.Development.json
+/Grab.A.Seat.Services.BookingService/appsettings.Production.json

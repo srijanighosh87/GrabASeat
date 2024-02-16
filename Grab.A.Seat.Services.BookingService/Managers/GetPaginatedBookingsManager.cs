@@ -48,11 +48,12 @@ namespace Grab.A.Seat.BookingAPI.Bookings.Managers
                     allBookings = _dbContext.Bookings
                         .Include(c => c.Customer)
                         .Include(t => t.Table)
-                        .Where(d => d.BookingStartDateTime >= DateTime.UtcNow)
+                        // disabling for now
+                        //.Where(d => d.BookingStartDateTime >= DateTime.UtcNow)
                         .OrderByDescending(a => a.BookingStartDateTime)
                         .Skip((command.pageNumber - 1) * command.numberOfItemsPerPage)
                         .Take(command.numberOfItemsPerPage);
-                    count = _dbContext.Bookings.Where(d => d.BookingStartDateTime >= DateTime.UtcNow).Count();
+                    count = _dbContext.Bookings.Count();
                 }
                 
                 var allBookingsAsOBjects = allBookings.OfType<Booking>();

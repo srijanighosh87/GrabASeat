@@ -25,10 +25,6 @@ namespace Grab.A.Seat.Domains.Data
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            //optionsBuilder.UseNpgsql(@"User ID=postgres;Password=Zetes123;Server=localhost;Port=5432;Database=grabaseatdb;Include Error Detail=true");
-            //optionsBuilder.UseSqlServer
-            //    (_configuration.GetConnectionString("DefaultConnection"), 
-            //    options => options.EnableRetryOnFailure());
         }
 
 

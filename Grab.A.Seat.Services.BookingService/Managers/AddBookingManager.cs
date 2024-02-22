@@ -59,6 +59,8 @@ namespace Grab.A.Seat.BookingAPI.Bookings.Managers
                 else
                 {
                     //add existing customer to booking
+                    if(!string.IsNullOrEmpty(command.Email))
+                        customer.Email = command.Email;
                     bookingToAdd.Customer = customer;
                 }
 
@@ -93,7 +95,8 @@ namespace Grab.A.Seat.BookingAPI.Bookings.Managers
                     {
                         RefNo = bookingToAdd.BookingReference,
                         Email = bookingToAdd.Customer.Email,
-                        Name = bookingToAdd.Customer.Name
+                        Name = bookingToAdd.Customer.Name,
+                        Date = bookingToAdd.BookingStartDateTime
                     });
 
                     if (emailResponse.IsSuccess)

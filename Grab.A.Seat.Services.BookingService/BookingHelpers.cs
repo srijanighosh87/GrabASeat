@@ -14,6 +14,7 @@ namespace Grab.A.seat.BookingService
             {
                 Name = command.CustomerName,
                 ContactNumber = command.CustomerContact,
+                Email = command.Email
             });
 
             dbContext.SaveChanges();
@@ -48,7 +49,8 @@ namespace Grab.A.seat.BookingService
                 Id = booking.Id,
                 PartySize = booking.PartySize,
                 TableNumber = booking.Table.TableNumber,
-                CustomerContact = booking.Customer.ContactNumber
+                CustomerContact = booking.Customer.ContactNumber,
+                CustomerEmail = booking.Customer.Email,
             };
         }
     }

@@ -7,6 +7,7 @@ namespace Grab.A.Seat.BookingAPI.Bookings.Dto
         public string? bookingReference { get; set; }
         public string? CustomerName { get; set; }
         public string? CustomerContact { get; set; }
+        public string? CustomerEmail { get; set; }
         public string? TableNumber { get; set; }
         public int? PartySize { get; set; }
         public DateTime? BookingStartDateTime { get; set; }

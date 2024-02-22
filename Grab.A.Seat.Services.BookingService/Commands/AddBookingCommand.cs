@@ -14,6 +14,8 @@ namespace Grab.A.Seat.BookingAPI.Bookings.Commands
         [Required]
         public DateTime BookingDateTime { get; set; }
         public string? Comments { get; set; }
+        public string? Email { get; set; }
+
 
     }
 }

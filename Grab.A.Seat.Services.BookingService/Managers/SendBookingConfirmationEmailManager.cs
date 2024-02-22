@@ -48,7 +48,7 @@ namespace Grab.A.Seat.BookingAPI.Bookings.Managers
                     Dear {command.Name},
                     </p>
                     <p>
-                    Your booking is confirmed now.
+                    Your booking is confirmed now for date: {command.Date}
                     </p>
                     <p>
                     Best regards,

@@ -8,6 +8,7 @@ using Grab.A.Seat.Shared.Manager;
 using Grab.A.Seat.Shared.ManagerConfig;
 using Grab.A.Seat.Shared.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,6 +34,8 @@ builder.Services.AddScoped<BaseManager<GetBookingByIdCommand>, GetBookingByIdMan
 builder.Services.AddScoped<BaseManager<UpdateBookingCommand>, UpdateBookingManager>();
 builder.Services.AddScoped<BaseManager<DeleteBookingCommand>, DeleteBookingManager>();
 builder.Services.AddScoped<BaseGetAllManager<SearchBookingCommand>, SearchBookingsManager>();
+builder.Services.AddScoped<BaseManager<SendEmailCommand>, SendBookingConfirmationEmailManager>();
+
 
 
 #endregion
@@ -60,11 +63,16 @@ builder.Services.AddCors(options =>
     });
 });
 
-var app = builder.Build();
+// Add health checks with additional options
+builder.Services.AddHealthChecks()
+    .AddCheck("custom", () =>
+    {
+        return Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy("Custom check is healthy!");
+    });
 
-//using var scope = app.Services.CreateScope();
-//await using var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-//await dbContext.Database.MigrateAsync();
+
+
+var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -82,6 +90,40 @@ else
     });
 }
 
+// Configure health check endpoint with a response writer
+app.Map("/health", context =>
+{
+    var healthCheckOptions = new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+    {
+        ResponseWriter = async (context, report) =>
+        {
+            context.Response.ContentType = "application/json";
+            if (report.Status == Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Healthy)
+            {
+
+                // Additional checks if the overall status is healthy
+                var databaseCheck = await CheckDatabaseAsync(context.RequestServices);
+                if (!databaseCheck)
+                {
+                    // Modify the overall status to Unhealthy
+                    context.Response.StatusCode = 503; // Service Unavailable
+                    await context.Response.WriteAsJsonAsync(new
+                    {
+                        Status = Microsoft.Extensions.Diagnostics.HealthChecks.HealthStatus.Unhealthy.ToString(),
+                        CustomMessage = "Database connectivity check failed."
+                    });
+                    return;
+                }
+            }
+                await context.Response.WriteAsJsonAsync(
+                new { Status = report.Status.ToString(), CustomMessage = "Health-Check Successful!" });
+        }
+    };
+
+    app.UseHealthChecks("/health", healthCheckOptions);
+});
+
+
 
 app.UseCors("AllowSpecificOrigin");
 
@@ -92,3 +134,23 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+
+// check database connectivity
+async Task<bool> CheckDatabaseAsync(IServiceProvider serviceProvider)
+{
+    try
+    {
+        // Resolve the ApplicationDbContext from the service provider
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            await dbContext.Database.CanConnectAsync();
+            return true;
+        }
+    }
+    catch (Exception)
+    {
+        return false;
+    }
+}

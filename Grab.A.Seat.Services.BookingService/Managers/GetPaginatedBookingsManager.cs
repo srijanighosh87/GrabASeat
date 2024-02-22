@@ -48,8 +48,6 @@ namespace Grab.A.Seat.BookingAPI.Bookings.Managers
                     allBookings = _dbContext.Bookings
                         .Include(c => c.Customer)
                         .Include(t => t.Table)
-                        // disabling for now
-                        //.Where(d => d.BookingStartDateTime >= DateTime.UtcNow)
                         .OrderByDescending(a => a.BookingStartDateTime)
                         .Skip((command.pageNumber - 1) * command.numberOfItemsPerPage)
                         .Take(command.numberOfItemsPerPage);

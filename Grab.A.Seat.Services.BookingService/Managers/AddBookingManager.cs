@@ -19,19 +19,21 @@ namespace Grab.A.Seat.BookingAPI.Bookings.Managers
         private readonly ResponseDto _responseDto;
         private readonly ApplicationDbContext _dbContext;
         private readonly IValidator<Booking> _validator;
-
+        private readonly BaseManager<SendEmailCommand> _emailSender;
 
 
         public AddBookingManager(
             ILogger<AddBookingManager> logger,
             ApplicationDbContext dbContext,
-            IValidator<Booking> validator
+            IValidator<Booking> validator,
+            BaseManager<SendEmailCommand> emailSender
             )
         {
             _logger = logger;
             _responseDto = new ResponseDto();
             _dbContext = dbContext;
             _validator = validator;
+            _emailSender = emailSender;
         }
         public async Task<ResponseDto> ProcessAsync(AddBookingCommand command)
         {
@@ -51,7 +53,6 @@ namespace Grab.A.Seat.BookingAPI.Bookings.Managers
                 if (customer == null)
                 {
                     //create Customer in DB and add it to booking
-                    //customer = await AddCustomerToDb(command);
                     customer = await BookingHelpers.AddCustomerToDb(command, _dbContext, _logger);
                     bookingToAdd.Customer = customer;
                 }
@@ -85,9 +86,24 @@ namespace Grab.A.Seat.BookingAPI.Bookings.Managers
                     var errorMessage = string.Join(", ", res.Errors.Select(a => a.ErrorMessage));
                     return WrapResponse.WrapError(_responseDto, errorMessage, logger: _logger);
                 }
-                
+
+                if(bookingToAdd.Customer!= null && bookingToAdd.Customer.Email!= null)
+                {
+                    var emailResponse = await _emailSender.ProcessAsync(new SendEmailCommand
+                    {
+                        RefNo = bookingToAdd.BookingReference,
+                        Email = bookingToAdd.Customer.Email,
+                        Name = bookingToAdd.Customer.Name
+                    });
+
+                    if (emailResponse.IsSuccess)
+                        return WrapResponse.WrapOk(_responseDto, "Booking Created", BookingHelpers.ConvertBookingToDto(bookingToAdd));
+                    else
+                        return WrapResponse.WrapError(_responseDto, emailResponse.Message.ToString(), logger: _logger);
+                }
 
                 return WrapResponse.WrapOk(_responseDto, "Booking Created", BookingHelpers.ConvertBookingToDto(bookingToAdd));
+    
             }
             catch (Exception e)
             {
